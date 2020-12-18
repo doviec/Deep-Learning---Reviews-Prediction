@@ -44,8 +44,8 @@ reviews_without_stopwords = reviews_data_set['Review'].apply(process_data)
 rating_data_set = reviews_data_set['Rating']
 
 # sorting data to Train & Test
-number_train = 1000
-number_test = 15000
+number_train = 650
+number_test = 5000
 train_reviews = reviews_without_stopwords[0:number_train]
 train_ratings = rating_data_set[0:number_train]
 
@@ -80,7 +80,7 @@ y = tf.nn.softmax(tf.matmul(z2, W3) + b3)
 # y = tf.nn.softmax(matmul_result + b)
 
 loss = -tf.reduce_mean(y_ * tf.log(y))
-alpha = 0.009
+alpha = 0.005
 update = tf.train.GradientDescentOptimizer(alpha).minimize(loss)
 
 # cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
@@ -133,7 +133,7 @@ sess.run(tf.global_variables_initializer())
 correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-for epoch in range(4000):
+for epoch in range(10000):
     sess.run(update, feed_dict={x: data_train_x, y_: data_train_y})
     if epoch % 1000 == 0:
         print("Epoch: {}, Loss: {}, Train Accuracy: {} ".format(epoch,
@@ -161,7 +161,7 @@ true_mid_prediction = 0
 true_high_prediction = 0
 
 print(sess.run(accuracy, feed_dict={x: data_test_x, y_: data_test_y}))
-print("Test Model")
+print("*** Test Model Details - Neural Network ***")
 for test_review, test_rating in zip(test_reviews, test_ratings):  # Accuracy Trues / All
     res = sess.run(y, feed_dict={x: [convert2vec(test_review)]})
     rating = "low"
@@ -198,13 +198,15 @@ for test_review, test_rating in zip(test_reviews, test_ratings):  # Accuracy Tru
     total_counter += 1
 
 print("Total Train Reviews :{}".format(number_train))
-print("Total True Predictions: {}".format(true_counter))
 print("Total Test Reviews: {}".format(total_counter))
-print("low - prediction: {}, Correct Prediction: {}, Actual: {}".format(low_prediction_counter, true_low_prediction, low_actual_counter))
+print("Total True Predictions: {}".format(true_counter))
+print("Low = 1*-2* | mid = 3* | High = 4*-5*")
+print("Low - prediction: {}, Correct Prediction: {}, Actual: {}".format(low_prediction_counter, true_low_prediction, low_actual_counter))
 print("Mid - prediction: {}, Correct Prediction: {}, Actual: {}".format(mid_prediction_counter, true_mid_prediction, mid_actual_counter))
 print("High - prediction: {}, Correct Prediction: {}, Actual: {}".format(high_prediction_counter, true_high_prediction, high_actual_counter))
 
 percentage = (true_counter / total_counter) * 100
 print("alpha: {}".format(alpha))
 print("Test Accuracy: {} % ".format(percentage))
-print("Error: {} % ".format(100 - percentage))
+print("Test Error: {} % ".format(100 - percentage))
+

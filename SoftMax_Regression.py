@@ -139,8 +139,8 @@ true_low_prediction = 0
 true_mid_prediction = 0
 true_high_prediction = 0
 
-print(sess.run(accuracy, feed_dict={x: data_test_x, y_: data_test_y}))
-print("Test Model")
+# print(sess.run(accuracy, feed_dict={x: data_test_x, y_: data_test_y}))
+print("*** Test Model Details - Neural Network ***")
 for test_review, test_rating in zip(test_reviews, test_ratings):  # Accuracy Trues / All
     res = sess.run(y, feed_dict={x: [convert2vec(test_review)]})
     rating = "low"
@@ -177,16 +177,17 @@ for test_review, test_rating in zip(test_reviews, test_ratings):  # Accuracy Tru
     total_counter += 1
 
 print("Total Train Reviews :{}".format(number_train))
-print("Total True Predictions: {}".format(true_counter))
 print("Total Test Reviews: {}".format(total_counter))
-print("low - prediction: {}, Correct Prediction: {}, Actual: {}".format(low_prediction_counter, true_low_prediction, low_actual_counter))
+print("Total True Predictions: {}".format(true_counter))
+print("Low = 1*-2* | mid = 3* | High = 4*-5*")
+print("Low - prediction: {}, Correct Prediction: {}, Actual: {}".format(low_prediction_counter, true_low_prediction, low_actual_counter))
 print("Mid - prediction: {}, Correct Prediction: {}, Actual: {}".format(mid_prediction_counter, true_mid_prediction, mid_actual_counter))
 print("High - prediction: {}, Correct Prediction: {}, Actual: {}".format(high_prediction_counter, true_high_prediction, high_actual_counter))
 
 percentage = (true_counter / total_counter) * 100
-print(alpha)
+print("alpha: {}".format(alpha))
 print("Test Accuracy: {} % ".format(percentage))
-print("Error: {} % ".format(100 - percentage))
+print("Test Error: {} % ".format(100 - percentage))
 
 
 
