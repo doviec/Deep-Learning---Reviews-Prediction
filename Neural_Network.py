@@ -37,15 +37,19 @@ def convert2vec(sentence):
     return res_vec
 
 
-# preperation of data set
+# variables
+alpha = 0.001
+number_train = 5000
+number_test = 10000
+early_stop = 0.99
+# preparation of data set
 reviews_data_set = pd.read_csv("tripadvisor_hotel_reviews.csv")  # Read the csv file"
 # reviews_data_set.info() # check no null
 reviews_without_stopwords = reviews_data_set['Review'].apply(process_data)
 rating_data_set = reviews_data_set['Rating']
 
 # sorting data to Train & Test
-number_train = 650
-number_test = 5000
+
 train_reviews = reviews_without_stopwords[0:number_train]
 train_ratings = rating_data_set[0:number_train]
 
@@ -58,11 +62,9 @@ vocabulary_size = prepare_vocabulary(train_reviews)  # bag of words
 
 features = vocabulary_size
 categories = 3  # labels
-(hidden1_size, hidden2_size) = (100, 50)
+(hidden1_size, hidden2_size) = (200, 100)
 x = tf.placeholder(tf.float32, [None, features])
 y_ = tf.placeholder(tf.float32, [None, categories])
-W = tf.Variable(tf.zeros([features, categories]))
-b = tf.Variable(tf.zeros([categories]))
 
 W1 = tf.Variable(tf.truncated_normal([features, hidden1_size], stddev=0.1))
 b1 = tf.Variable(tf.constant(0.1, shape=[hidden1_size]))
@@ -79,9 +81,8 @@ y = tf.nn.softmax(tf.matmul(z2, W3) + b3)
 # matmul_result = tf.matmul(x, W)
 # y = tf.nn.softmax(matmul_result + b)
 
-loss = -tf.reduce_mean(y_ * tf.log(y))
-alpha = 0.005
-update = tf.train.GradientDescentOptimizer(alpha).minimize(loss)
+cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+update = tf.train.GradientDescentOptimizer(alpha).minimize(cross_entropy)
 
 # cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
 # update = tf.train.GradientDescentOptimizer(alpha).minimize(cross_entropy)
@@ -133,19 +134,20 @@ sess.run(tf.global_variables_initializer())
 correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-for epoch in range(10000):
-    sess.run(update, feed_dict={x: data_train_x, y_: data_train_y})
-    if epoch % 1000 == 0:
-        print("Epoch: {}, Loss: {}, Train Accuracy: {} ".format(epoch,
-            loss.eval(session=sess, feed_dict={x: data_train_x, y_: data_train_y}),
-            sess.run(accuracy, feed_dict={x: data_train_x, y_: data_train_y})))
-#
-# for i in range(1000):
-#     batch_size = 10
-#     start_batch = i*batch_size
-#     end_batch = (i+1)*batch_size
-#     batch_xs = data_train_x[start_batch:end_batch]
-
+for i in range(300):
+    for j in range(500):
+        batch_size = 20
+        start_batch = j * batch_size
+        end_batch = (j + 1) * batch_size
+        batch_xs = data_train_x[start_batch:end_batch]
+        batch_ys = data_train_y[start_batch:end_batch]
+        sess.run(update, feed_dict={x: batch_xs, y_: batch_ys})
+    print("i: {}, Test Accuracy {}, Train Accuracy: {}".format(i, sess.run(accuracy,
+                                                                           feed_dict={x: data_test_x, y_: data_test_y}),
+                                                               sess.run(accuracy,
+                                                                        feed_dict={x: data_train_x, y_: data_train_y})))
+    if sess.run(accuracy, feed_dict={x: data_train_x, y_: data_train_y}) > early_stop:
+        break
 
 # print data
 total_counter = 0
@@ -201,12 +203,14 @@ print("Total Train Reviews :{}".format(number_train))
 print("Total Test Reviews: {}".format(total_counter))
 print("Total True Predictions: {}".format(true_counter))
 print("Low = 1*-2* | mid = 3* | High = 4*-5*")
-print("Low - prediction: {}, Correct Prediction: {}, Actual: {}".format(low_prediction_counter, true_low_prediction, low_actual_counter))
-print("Mid - prediction: {}, Correct Prediction: {}, Actual: {}".format(mid_prediction_counter, true_mid_prediction, mid_actual_counter))
-print("High - prediction: {}, Correct Prediction: {}, Actual: {}".format(high_prediction_counter, true_high_prediction, high_actual_counter))
+print("Low - prediction: {}, Correct Prediction: {}, Actual: {}".format(low_prediction_counter, true_low_prediction,
+                                                                        low_actual_counter))
+print("Mid - prediction: {}, Correct Prediction: {}, Actual: {}".format(mid_prediction_counter, true_mid_prediction,
+                                                                        mid_actual_counter))
+print("High - prediction: {}, Correct Prediction: {}, Actual: {}".format(high_prediction_counter, true_high_prediction,
+                                                                         high_actual_counter))
 
 percentage = (true_counter / total_counter) * 100
 print("alpha: {}".format(alpha))
 print("Test Accuracy: {} % ".format(percentage))
 print("Test Error: {} % ".format(100 - percentage))
-
