@@ -77,7 +77,7 @@ update = tf.train.GradientDescentOptimizer(alpha).minimize(loss)
 # cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
 # update = tf.train.GradientDescentOptimizer(alpha).minimize(cross_entropy)
 
-# convert to bag of words the reviews
+# convert the reviews to bag of words
 tmp_train_x = []
 tmp_test_x = []
 
@@ -90,10 +90,10 @@ for review in test_reviews:
 data_train_x = np.array(tmp_train_x)
 data_test_x = np.array(tmp_test_x)
 
+# convert the ratings to vectors
 tmp_train_y = []
 tmp_test_y = []
 
-# convert to labels the ratings
 for rating in train_ratings:
     rating_vec = [0, 0, 0]
     if rating > 3:
@@ -141,17 +141,6 @@ for i in range(200):
                                                                                   feed_dict={x: data_train_x,
                                                                                              y_: data_train_y})))
 
-# for epoch in range(epochs):
-#     if sess.run(accuracy, feed_dict={x: data_train_x, y_: data_train_y}) > early_stop:
-#         break
-#     sess.run(update, feed_dict={x: data_train_x, y_: data_train_y})
-#     if epoch % 500 == 0:
-#         print("Epoch: {}, Loss: {}, Train Accuracy: {} ".format(epoch, loss.eval(session=sess,
-#                                                                                  feed_dict={x: data_train_x,
-#                                                                                             y_: data_train_y}),
-#                                                                 sess.run(accuracy, feed_dict={x: data_train_x,
-#                                                                                               y_: data_train_y})))
-
 # data to be printed
 total_counter = 0
 true_counter = 0
@@ -165,7 +154,6 @@ true_low_prediction = 0
 true_mid_prediction = 0
 true_high_prediction = 0
 
-# print(sess.run(accuracy, feed_dict={x: data_test_x, y_: data_test_y}))
 print("* Test Model Details - SoftMax *")
 for test_review, test_rating in zip(test_reviews, test_ratings):  # Accuracy Trues / All
     res = sess.run(y, feed_dict={x: [convert2vec(test_review)]})
@@ -198,7 +186,6 @@ for test_review, test_rating in zip(test_reviews, test_ratings):  # Accuracy Tru
         if rating == "high":
             true_high_prediction += 1
             true_counter += 1
-    # print('review: {} | rating: {} | prediction {} | res {}'.format(test_review[:50], test_rating, rating, res))
 
     total_counter += 1
 

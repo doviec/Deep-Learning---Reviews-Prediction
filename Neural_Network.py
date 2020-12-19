@@ -10,8 +10,6 @@ stop_words = stopwords.words('english')
 
 
 # functions:
-
-
 def process_data(text):  # data clean from irrelevant words and numbers, spaces etc
     text = re.sub(r'\d+', ' ', text)
     text = nltk.word_tokenize(text)
@@ -42,8 +40,9 @@ alpha = 0.001
 number_train = 10000
 number_test = 5000
 early_stop = 0.95
+
 # preparation of data set
-reviews_data_set = pd.read_csv("tripadvisor_hotel_reviews.csv")  # Read the csv file"
+reviews_data_set = pd.read_csv("tripadvisor_hotel_reviews.csv")  # Read the csv file
 # reviews_data_set.info() # check no null
 reviews_without_stopwords = reviews_data_set['Review'].apply(process_data)
 rating_data_set = reviews_data_set['Rating']
@@ -78,16 +77,10 @@ W3 = tf.Variable(tf.truncated_normal([hidden2_size, categories], stddev=0.1))
 b3 = tf.Variable(tf.constant(0.1, shape=[categories]))
 y = tf.nn.softmax(tf.matmul(z2, W3) + b3)
 
-# matmul_result = tf.matmul(x, W)
-# y = tf.nn.softmax(matmul_result + b)
-
 cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
 update = tf.train.GradientDescentOptimizer(alpha).minimize(cross_entropy)
 
-# cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
-# update = tf.train.GradientDescentOptimizer(alpha).minimize(cross_entropy)
-
-# convert to bag of words the reviews
+# convert the reviews to bag of words
 tmp_train_x = []
 tmp_test_x = []
 
@@ -100,10 +93,10 @@ for review in test_reviews:
 data_train_x = np.array(tmp_train_x)
 data_test_x = np.array(tmp_test_x)
 
+# convert the ratings to vectors
 tmp_train_y = []
 tmp_test_y = []
 
-# convert to labels the ratings
 for rating in train_ratings:
     rating_vec = [0, 0, 0]
     if rating > 3:
@@ -149,7 +142,7 @@ for i in range(200):
     if sess.run(accuracy, feed_dict={x: data_train_x, y_: data_train_y}) > early_stop:
         break
 
-# print data
+# data to be printed
 total_counter = 0
 true_counter = 0
 low_prediction_counter = 0
@@ -162,8 +155,7 @@ true_low_prediction = 0
 true_mid_prediction = 0
 true_high_prediction = 0
 
-print(sess.run(accuracy, feed_dict={x: data_test_x, y_: data_test_y}))
-print("*** Test Model Details - Neural Network ***")
+print("* Test Model Details - Neural Network *")
 for test_review, test_rating in zip(test_reviews, test_ratings):  # Accuracy Trues / All
     res = sess.run(y, feed_dict={x: [convert2vec(test_review)]})
     rating = "low"
@@ -195,7 +187,6 @@ for test_review, test_rating in zip(test_reviews, test_ratings):  # Accuracy Tru
         if rating == "high":
             true_high_prediction += 1
             true_counter += 1
-    # print('review: {} | rating: {} | prediction {} | res {}'.format(test_review[:50], test_rating, rating, res))
 
     total_counter += 1
 
