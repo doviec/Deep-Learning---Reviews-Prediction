@@ -39,9 +39,9 @@ def convert2vec(sentence):
 
 # variables
 alpha = 0.001
-number_train = 5000
-number_test = 10000
-early_stop = 0.99
+number_train = 10000
+number_test = 5000
+early_stop = 0.95
 # preparation of data set
 reviews_data_set = pd.read_csv("tripadvisor_hotel_reviews.csv")  # Read the csv file"
 # reviews_data_set.info() # check no null
@@ -62,7 +62,7 @@ vocabulary_size = prepare_vocabulary(train_reviews)  # bag of words
 
 features = vocabulary_size
 categories = 3  # labels
-(hidden1_size, hidden2_size) = (200, 100)
+(hidden1_size, hidden2_size) = (400, 100)
 x = tf.placeholder(tf.float32, [None, features])
 y_ = tf.placeholder(tf.float32, [None, categories])
 
@@ -134,9 +134,9 @@ sess.run(tf.global_variables_initializer())
 correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-for i in range(300):
-    for j in range(500):
-        batch_size = 20
+for i in range(200):
+    for j in range(400):
+        batch_size = 25
         start_batch = j * batch_size
         end_batch = (j + 1) * batch_size
         batch_xs = data_train_x[start_batch:end_batch]

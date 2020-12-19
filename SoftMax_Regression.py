@@ -46,8 +46,8 @@ rating_data_set = reviews_data_set['Rating']
 # variables
 epochs = 15000
 alpha = 0.001
-number_train = 1000
-number_test = 1000
+number_train = 10000
+number_test = 5000
 early_stop = 0.85
 
 # sorting data to Train & Test
@@ -123,16 +123,34 @@ sess.run(tf.global_variables_initializer())
 
 correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-for epoch in range(epochs):
-    if sess.run(accuracy, feed_dict={x: data_train_x, y_: data_train_y}) > early_stop:
-        break
-    sess.run(update, feed_dict={x: data_train_x, y_: data_train_y})
-    if epoch % 500 == 0:
-        print("Epoch: {}, Loss: {}, Train Accuracy: {} ".format(epoch, loss.eval(session=sess,
-                                                                                 feed_dict={x: data_train_x,
-                                                                                            y_: data_train_y}),
-                                                                sess.run(accuracy, feed_dict={x: data_train_x,
-                                                                                              y_: data_train_y})))
+for i in range(200):
+    for j in range(500):
+        batch_size = 20
+        start_batch = j * batch_size
+        end_batch = (j + 1) * batch_size
+        batch_xs = data_train_x[start_batch:end_batch]
+        batch_ys = data_train_y[start_batch:end_batch]
+        sess.run(update, feed_dict={x: batch_xs, y_: batch_ys})
+    print("i: {}, Loss: {}, Test Accuracy {}, Train Accuracy: {}".format(i, loss.eval(session=sess,
+                                                                                      feed_dict={x: data_train_x,
+                                                                                                 y_: data_train_y}),
+                                                                         sess.run(accuracy,
+                                                                                  feed_dict={x: data_test_x,
+                                                                                             y_: data_test_y}),
+                                                                         sess.run(accuracy,
+                                                                                  feed_dict={x: data_train_x,
+                                                                                             y_: data_train_y})))
+
+# for epoch in range(epochs):
+#     if sess.run(accuracy, feed_dict={x: data_train_x, y_: data_train_y}) > early_stop:
+#         break
+#     sess.run(update, feed_dict={x: data_train_x, y_: data_train_y})
+#     if epoch % 500 == 0:
+#         print("Epoch: {}, Loss: {}, Train Accuracy: {} ".format(epoch, loss.eval(session=sess,
+#                                                                                  feed_dict={x: data_train_x,
+#                                                                                             y_: data_train_y}),
+#                                                                 sess.run(accuracy, feed_dict={x: data_train_x,
+#                                                                                               y_: data_train_y})))
 
 # data to be printed
 total_counter = 0
@@ -148,7 +166,7 @@ true_mid_prediction = 0
 true_high_prediction = 0
 
 # print(sess.run(accuracy, feed_dict={x: data_test_x, y_: data_test_y}))
-print("*** Test Model Details - SoftMax ***")
+print("* Test Model Details - SoftMax *")
 for test_review, test_rating in zip(test_reviews, test_ratings):  # Accuracy Trues / All
     res = sess.run(y, feed_dict={x: [convert2vec(test_review)]})
     rating = "low"
