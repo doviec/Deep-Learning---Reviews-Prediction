@@ -74,25 +74,29 @@ inputs = tf.keras.Input(shape=(max_seq_length,))
 
 embedding_dim = 128
 
+# Add embedding layer
 embedding = tf.keras.layers.Embedding(
     input_dim=num_words,
     output_dim=embedding_dim,
     input_length=max_seq_length
 )(inputs)
 
+# Add GRU layer
 gru = tf.keras.layers.Bidirectional(
-    tf.keras.layers.GRU(128, return_sequences=True)
+    tf.keras.layers.GRU(embedding_dim, return_sequences=True)
 )(embedding)
 
+# Flatten the data coming out the GRU layer
 flatten = tf.keras.layers.Flatten()(gru)
 
+# Output layer using softmax activation function
 outputs = tf.keras.layers.Dense(3, activation='softmax')(flatten)
 
-
+# Initiate the model
 model = tf.keras.Model(inputs, outputs)
 
-tf.keras.utils.plot_model(model)
-
+# Compile the mode with Adam optimizer,
+# categorical_crossentropy as the loss function,
 model.compile(
     optimizer='adam',
     loss='categorical_crossentropy',
@@ -100,7 +104,10 @@ model.compile(
         'accuracy'
     ]
 )
-model.summary()
+
+# Train the model on our train inputs and labels,
+# Split 20% of the train set to validation set,
+# Define early stopping callback.
 history = model.fit(
     train_inputs,
     train_labels,
@@ -115,6 +122,8 @@ history = model.fit(
     ]
 )
 
+
 print("Test Evaluation")
 
+# Evaluate the model
 model.evaluate(test_inputs, test_labels)
